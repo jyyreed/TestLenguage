@@ -7,7 +7,7 @@
     <script>
         // Función para obtener las palabras del script de Google
         async function getWords() {
-            const url = 'https://script.google.com/macros/s/AKfycbyemZAB08IX1S69EwCIwpgdUzp-I2LkYPsSqlwUlRZprijA6EUjvn5ssapox_8R0K-u6g/exec';
+            const url = 'https://script.google.com/macros/s/AKfycbz6M-z27KOWwdgU7m1VPhjTSFcKkdKflRbLIar0b39o8Pl8TiKw4SXL89YRfkXNzeQx0g/exec';
 
             try {
                 const response = await fetch(url);
@@ -45,7 +45,7 @@
 
         // Función para reproducir la pronunciación usando Google TTS
         function playAudio(word) {
-            const audio = new Audio(https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=es&client=tw-ob);
+            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=es&client=tw-ob`);
             audio.play();
         }
 
