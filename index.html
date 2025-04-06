@@ -1,55 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Idioma Speaker</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    input, select, button {
-      padding: 10px;
-      font-size: 1.2em;
-      margin: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Languages</title>
+    <script>
+        async function getWords() {
+            const url = "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbyAa_Gu1fm2gpdbFKVJbQObkv3DBUPZBoPGgCa_vA9GWqxzOIPZiMf3noYkpK0A4qbjZA/exec"; // URL de tu script de Google
+            const response = await fetch(url);
+            const words = await response.text(); // Esto devuelve todas las palabras
+            const wordsArray = words.split('\n'); // Suponiendo que cada palabra está separada por un salto de línea
+            displayWords(wordsArray);
+        }
+
+        function displayWords(words) {
+            const table = document.getElementById('wordsTable');
+            words.forEach((word, index) => {
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+                
+                cell1.textContent = word; // Palabra en inglés
+                cell2.textContent = ""; // Palabra en español (por ahora vacío)
+                cell3.textContent = ""; // Palabra en chino (por ahora vacío)
+                
+                // Botón para reproducir pronunciación
+                const audioButton = document.createElement('button');
+                audioButton.textContent = "Reproducir";
+                audioButton.onclick = function() { playAudio(word); };
+                cell4.appendChild(audioButton);
+            });
+        }
+
+        function playAudio(word) {
+            // Aquí puedes utilizar una API TTS o cualquier servicio para generar el audio
+            const audio = new Audio(`https://api.voicerss.org/?key=YOUR_API_KEY&hl=en-us&src=${word}`);
+            audio.play();
+        }
+
+        window.onload = getWords; // Llamar a la función para cargar las palabras al cargar la página
+    </script>
 </head>
 <body>
-  <h2>🔊 Pronunciación desde Google Sheets</h2>
-  <p><strong>Palabra:</strong> <span id="displayWord">Cargando...</span></p>
-  <select id="language">
-    <option value="es-ES">Español</option>
-    <option value="zh-CN">Chino</option>
-  </select>
-  <br>
-  <button onclick="speak()">Escuchar</button>
-
-  <script>
-    let palabra = "";
-
-    // URL de tu Web App de Google Apps Script (reemplaza con tu URL)
-    const API_URL = "https://script.google.com/macros/s/AKfycbyAa_Gu1fm2gpdbFKVJbQObkv3DBUPZBoPGgCa_vA9GWqxzOIPZiMf3noYkpK0A4qbjZA/exec";  // <- cambia esto por tu URL
-
-    // URL del proxy CORS + tu URL de la Web App de Google
-const url = "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbyF7Ou83nCQzKRyXIt2NdOk4x2Ach9LZiOB2wVq14QF/dev";
-
-// Hacemos la solicitud de la palabra desde la celda A2
-fetch(url)
-  .then(response => response.text())
-  .then(data => {
-    // Aquí puedes usar la palabra devuelta
-    console.log(data);
-  })
-  .catch(error => console.error("Error al hacer la solicitud:", error));
-
-    function speak() {
-      const lang = document.getElementById("language").value;
-      const utterance = new SpeechSynthesisUtterance(palabra);
-      utterance.lang = lang;
-      speechSynthesis.speak(utterance);
-    }
-  </script>
+    <h1>Lista de Palabras</h1>
+    <table id="wordsTable" border="1">
+        <thead>
+            <tr>
+                <th>Inglés</th>
+                <th>Español</th>
+                <th>Chino</th>
+                <th>Pronunciación</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas se insertarán dinámicamente aquí -->
+        </tbody>
+    </table>
 </body>
 </html>
