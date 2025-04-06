@@ -2,38 +2,113 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Traductor de Idiomas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traducción y Pronunciación</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Traducción y Pronunciación de Palabras</h1>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Inglés</th>
+        <th>Español</th>
+        <th>Chino</th>
+        <th>Escuchar (Inglés)</th>
+        <th>Escuchar (Español)</th>
+        <th>Escuchar (Chino)</th>
+      </tr>
+    </thead>
+    <tbody id="wordTable">
+      <!-- Aquí se agregarán las filas con las palabras y botones -->
+    </tbody>
+  </table>
+
   <script>
-    async function getPronunciation(word, language) {
+    async function getWords() {
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec';
+
       try {
-        // Usar el nuevo URL del script de Google
-        const response = await fetch(`https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec?word=${word}&lang=${language}`);
-        const audioUrl = await response.text();
-        
-        // Crear un elemento de audio para reproducir
-        const audio = new Audio(audioUrl);
-        audio.play();
+        const response = await fetch(proxyUrl + apiUrl);
+        const data = await response.text(); // Texto con las palabras
+        const words = data.split('\n').filter(Boolean); // Separar las palabras
+
+        // Crear las filas para la tabla
+        const wordTable = document.getElementById('wordTable');
+        for (let i = 0; i < words.length; i += 3) {
+          const english = words[i];
+          const spanish = words[i + 1];
+          const chinese = words[i + 2];
+
+          // Crear una nueva fila en la tabla
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${english}</td>
+            <td>${spanish}</td>
+            <td>${chinese}</td>
+            <td><button onclick="playAudio('${english}', 'en')">Escuchar (Inglés)</button></td>
+            <td><button onclick="playAudio('${spanish}', 'es')">Escuchar (Español)</button></td>
+            <td><button onclick="playAudio('${chinese}', 'zh')">Escuchar (Chino)</button></td>
+          `;
+          wordTable.appendChild(row);
+        }
       } catch (error) {
-        console.error("Error al obtener la pronunciación:", error);
+        console.error('Error al obtener las palabras:', error);
       }
     }
 
-    function handleButtonClick(language) {
-      const word = document.getElementById('wordInput').value;
-      if (word) {
-        getPronunciation(word, language);
-      } else {
-        alert('Por favor, ingresa una palabra');
+    // Función para reproducir el audio
+    async function playAudio(word, lang) {
+      try {
+        const audioUrl = await getAudioUrl(word, lang);
+        const audio = new Audio(audioUrl);
+        audio.play();
+      } catch (error) {
+        console.error('Error al reproducir el audio:', error);
       }
     }
+
+    // Función para obtener la URL de audio desde el script de Google
+    async function getAudioUrl(word, lang) {
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const apiUrl = `https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec?word=${word}&lang=${lang}`;
+
+      const response = await fetch(proxyUrl + apiUrl);
+      const audioUrl = await response.text();
+      return audioUrl;
+    }
+
+    // Llamar a getWords al cargar la página
+    window.onload = getWords;
   </script>
-</head>
-<body>
-  <h1>Traductor de Idiomas</h1>
-  <input type="text" id="wordInput" placeholder="Escribe una palabra">
-  
-  <button onclick="handleButtonClick('es')">Escuchar en español</button>
-  <button onclick="handleButtonClick('en')">Escuchar en inglés</button>
-  <button onclick="handleButtonClick('zh')">Escuchar en chino</button>
 </body>
 </html>
