@@ -45,7 +45,19 @@
 
         // Función para reproducir la pronunciación usando Google TTS
         function playAudio(word) {
-            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=es&client=tw-ob`);
+            // Aquí cambiamos el código para que use Google TTS dependiendo del idioma
+            let lang = 'es'; // Predeterminamos el idioma a español
+
+            // Si la palabra está en inglés, ajustamos el idioma
+            if (word.match(/[a-zA-Z]/)) {
+                lang = 'en';
+            } 
+            // Si la palabra está en chino, usamos el código de idioma chino
+            else if (word.match(/[\u4e00-\u9fff]/)) {
+                lang = 'zh';
+            }
+
+            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=${lang}&client=tw-ob`);
             audio.play();
         }
 
