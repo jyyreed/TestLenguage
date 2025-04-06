@@ -1,112 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Traducción y Pronunciación</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px;
-      text-align: left;
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    button {
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-</head>
-<body>
-  <h1>Traducción y Pronunciación de Palabras</h1>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Inglés</th>
-        <th>Español</th>
-        <th>Chino</th>
-        <th>Escuchar (Inglés)</th>
-        <th>Escuchar (Español)</th>
-        <th>Escuchar (Chino)</th>
-      </tr>
-    </thead>
-    <tbody id="wordTable">
-      <!-- Aquí se agregarán las filas con las palabras y botones -->
-    </tbody>
-  </table>
+function doGet() {
+  // Accede a tu hoja de cálculo de Google
+  var ss = SpreadsheetApp.openById('1yfF8PUt0NmRZR-Ac7Eqk9FF9yUSeqx7z1PA5CIjRTbI');
+  var sheet = ss.getSheetByName('Idiomas');
 
-  <script>
-    async function getWords() {
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec';
+  // Obtén todas las filas desde la fila 3 hacia abajo, y las tres columnas
+  var data = sheet.getRange(3, 2, sheet.getLastRow() - 2, 3).getValues();
 
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.text(); // Texto con las palabras
-        const words = data.split('\n').filter(Boolean); // Separar las palabras
+  var result = "";
 
-        // Crear las filas para la tabla
-        const wordTable = document.getElementById('wordTable');
-        for (let i = 0; i < words.length; i += 3) {
-          const english = words[i];
-          const spanish = words[i + 1];
-          const chinese = words[i + 2];
+  // Recorre los datos y arma un string con las palabras de cada columna
+  data.forEach(function(row) {
+    var english = row[0];  // Palabra en inglés
+    var spanish = row[1];  // Palabra en español
+    var chinese = row[2];  // Palabra en chino
+    
+    result += english + '\n' + spanish + '\n' + chinese + '\n';
+  });
 
-          // Crear una nueva fila en la tabla
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${english}</td>
-            <td>${spanish}</td>
-            <td>${chinese}</td>
-            <td><button onclick="playAudio('${english}', 'en')">Escuchar (Inglés)</button></td>
-            <td><button onclick="playAudio('${spanish}', 'es')">Escuchar (Español)</button></td>
-            <td><button onclick="playAudio('${chinese}', 'zh')">Escuchar (Chino)</button></td>
-          `;
-          wordTable.appendChild(row);
-        }
-      } catch (error) {
-        console.error('Error al obtener las palabras:', error);
-      }
-    }
+  // Establecer los encabezados CORS para permitir solicitudes
+  var output = ContentService.createTextOutput(result);
+  output.setMimeType(ContentService.MimeType.TEXT);
+  output.appendHeader('Access-Control-Allow-Origin', '*'); // Permitir todos los orígenes
+  output.appendHeader('Access-Control-Allow-Methods', 'GET'); // Solo métodos GET
 
-    // Función para reproducir el audio
-    async function playAudio(word, lang) {
-      try {
-        const audioUrl = await getAudioUrl(word, lang);
-        const audio = new Audio(audioUrl);
-        audio.play();
-      } catch (error) {
-        console.error('Error al reproducir el audio:', error);
-      }
-    }
-
-    // Función para obtener la URL de audio desde el script de Google
-    async function getAudioUrl(word, lang) {
-      const apiUrl = `https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec?word=${word}&lang=${lang}`;
-
-      const response = await fetch(apiUrl);
-      const audioUrl = await response.text();
-      return audioUrl;
-    }
-
-    // Llamar a getWords al cargar la página
-    window.onload = getWords;
-  </script>
-</body>
-</html>
+  return output;
+}
