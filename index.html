@@ -1,51 +1,32 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Languages</title>
-    <script>
-        async function getWords() {
-            const url = "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbyAa_Gu1fm2gpdbFKVJbQObkv3DBUPZBoPGgCa_vA9GWqxzOIPZiMf3noYkpK0A4qbjZA/exec"; // URL de tu script de Google
-            const response = await fetch(url);
-            const words = await response.text(); // Esto devuelve todas las palabras
-            const wordsArray = words.split('\n'); // Suponiendo que cada palabra está separada por un salto de línea
-            displayWords(wordsArray);
+    <title>Traductor Web</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        function displayWords(words) {
-            const table = document.getElementById('wordsTable');
-            words.forEach((word, index) => {
-                const row = table.insertRow();
-                const cell1 = row.insertCell(0);
-                const cell2 = row.insertCell(1);
-                const cell3 = row.insertCell(2);
-                const cell4 = row.insertCell(3);
-                
-                cell1.textContent = word; // Palabra en inglés
-                cell2.textContent = ""; // Palabra en español (por ahora vacío)
-                cell3.textContent = ""; // Palabra en chino (por ahora vacío)
-                
-                // Botón para reproducir pronunciación
-                const audioButton = document.createElement('button');
-                audioButton.textContent = "Reproducir";
-                audioButton.onclick = function() { playAudio(word); };
-                cell4.appendChild(audioButton);
-            });
+        table, th, td {
+            border: 1px solid black;
         }
 
-        function playAudio(word) {
-            // Aquí puedes utilizar una API TTS o cualquier servicio para generar el audio
-            const audio = new Audio(`https://api.voicerss.org/?key=YOUR_API_KEY&hl=en-us&src=${word}`);
-            audio.play();
+        th, td {
+            padding: 8px;
+            text-align: left;
         }
 
-        window.onload = getWords; // Llamar a la función para cargar las palabras al cargar la página
-    </script>
+        button {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Lista de Palabras</h1>
-    <table id="wordsTable" border="1">
+    <h1>Traductor Web</h1>
+    <table id="english-table">
         <thead>
             <tr>
                 <th>Inglés</th>
@@ -55,8 +36,49 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Las filas se insertarán dinámicamente aquí -->
+            <!-- Aquí se llenarán las filas dinámicamente -->
         </tbody>
     </table>
+
+    <script>
+        // Función para obtener los datos de la hoja de cálculo de Google
+        async function fetchData() {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbx1SaK0Ibh8vxGDPWtCWMJrfSOhZw9niZ9ajHOz6QG7o_4pcknl8c6N0dfOv66edSCsEA/exec');
+            const data = await response.text();
+
+            // Dividir los datos en un array por líneas
+            const lines = data.split("\n");
+
+            const tableBody = document.querySelector("#english-table tbody");
+
+            lines.forEach(line => {
+                const [english, spanish, chinese] = line.split("\t");
+
+                if (english && spanish && chinese) {
+                    // Crear una nueva fila en la tabla
+                    const row = document.createElement("tr");
+
+                    // Colocar las palabras
+                    row.innerHTML = `
+                        <td>${english}</td>
+                        <td>${spanish}</td>
+                        <td>${chinese}</td>
+                        <td><button onclick="speakWord('${english}', 'en')">Pronunciar (Inglés)</button></td>
+                    `;
+
+                    tableBody.appendChild(row);
+                }
+            });
+        }
+
+        // Función para reproducir la pronunciación de la palabra usando la API de Google Translate
+        function speakWord(word, language) {
+            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=${language}&client=gtx`);
+            audio.play();
+        }
+
+        // Ejecutar fetchData cuando la página cargue
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
