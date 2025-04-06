@@ -54,11 +54,10 @@
 
   <script>
     async function getWords() {
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const apiUrl = 'https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec';
 
       try {
-        const response = await fetch(proxyUrl + apiUrl);
+        const response = await fetch(apiUrl);
         const data = await response.text(); // Texto con las palabras
         const words = data.split('\n').filter(Boolean); // Separar las palabras
 
@@ -99,10 +98,9 @@
 
     // Función para obtener la URL de audio desde el script de Google
     async function getAudioUrl(word, lang) {
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const apiUrl = `https://script.google.com/macros/s/AKfycbygVghH1VXwd4a6KLexzWEtCBjkKrVYaCSA9wUmBcSTS22ZXwvmoG7bQeAYy38TKpkCtw/exec?word=${word}&lang=${lang}`;
 
-      const response = await fetch(proxyUrl + apiUrl);
+      const response = await fetch(apiUrl);
       const audioUrl = await response.text();
       return audioUrl;
     }
