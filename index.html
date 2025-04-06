@@ -32,13 +32,17 @@
     // URL de tu Web App de Google Apps Script (reemplaza con tu URL)
     const API_URL = "https://script.google.com/macros/s/AKfycbyAa_Gu1fm2gpdbFKVJbQObkv3DBUPZBoPGgCa_vA9GWqxzOIPZiMf3noYkpK0A4qbjZA/exec";  // <- cambia esto por tu URL
 
-    // Obtener palabra desde Google Sheets
-    fetch(API_URL)
-      .then(res => res.text())
-      .then(data => {
-        palabra = data;
-        document.getElementById("displayWord").textContent = palabra;
-      });
+    // URL del proxy CORS + tu URL de la Web App de Google
+const url = "https://cors-anywhere.herokuapp.com/https://script.google.com/macros/s/AKfycbyF7Ou83nCQzKRyXIt2NdOk4x2Ach9LZiOB2wVq14QF/dev";
+
+// Hacemos la solicitud de la palabra desde la celda A2
+fetch(url)
+  .then(response => response.text())
+  .then(data => {
+    // Aquí puedes usar la palabra devuelta
+    console.log(data);
+  })
+  .catch(error => console.error("Error al hacer la solicitud:", error));
 
     function speak() {
       const lang = document.getElementById("language").value;
