@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Traducción y Pronunciación</title>
+  <title>Tabla de Traducciones y Pronunciación</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,8 +16,8 @@
     }
     th, td {
       padding: 10px;
-      text-align: left;
       border: 1px solid #ddd;
+      text-align: left;
     }
     th {
       background-color: #f2f2f2;
@@ -35,9 +35,8 @@
   </style>
 </head>
 <body>
-  <h1>Traducción y Pronunciación de Palabras</h1>
-  
-  <table>
+  <h1>Tabla de Traducciones</h1>
+  <table id="wordTable">
     <thead>
       <tr>
         <th>Inglés</th>
@@ -48,36 +47,34 @@
         <th>Pronunciación (Chino)</th>
       </tr>
     </thead>
-    <tbody id="wordTable">
-      <!-- Se generarán las filas dinámicamente -->
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    // Función para obtener las palabras desde la base de datos (ya en el servidor)
+    // Función para obtener las palabras desde el script de Google
     async function getWords() {
-      const apiUrl = 'https://script.google.com/macros/s/AKfycbxVr9DK0xA1QzdF4ABZEM6SC3sXfg93PVMRy5AwkEstnD16SN4u41tDDAyIKvNDKU_Vog/exec';
+      // Usamos la URL de tu script actual
+      const url = 'https://script.google.com/macros/s/AKfycbxVr9DK0xA1QzdF4ABZEM6SC3sXfg93PVMRy5AwkEstnD16SN4u41tDDAyIKvNDKU_Vog/exec';
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(url);
         const data = await response.text();
-        const words = data.split('\n').filter(Boolean); // Separa por salto de línea y elimina líneas vacías
-        displayWords(words);
+        // Se asume que la respuesta tiene 3 líneas por cada entrada: inglés, español y chino.
+        const lines = data.split('\n').filter(line => line.trim() !== '');
+        displayWords(lines);
       } catch (error) {
-        console.error('Error al obtener las palabras:', error);
+        console.error("Error al obtener las palabras:", error);
       }
     }
 
     // Función para mostrar las palabras en la tabla
-    function displayWords(words) {
-      const tableBody = document.getElementById('wordTable');
-      tableBody.innerHTML = ''; // Limpiar la tabla antes de agregar filas
-
-      // Suponiendo que los datos están en grupos de 3 (Inglés, Español, Chino)
-      for (let i = 0; i < words.length; i += 3) {
-        const english = words[i];
-        const spanish = words[i + 1];
-        const chinese = words[i + 2];
-
+    function displayWords(lines) {
+      const tbody = document.querySelector('#wordTable tbody');
+      tbody.innerHTML = '';
+      // Cada 3 líneas corresponden a una fila
+      for (let i = 0; i < lines.length; i += 3) {
+        const english = lines[i];
+        const spanish = lines[i + 1];
+        const chinese = lines[i + 2];
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${english}</td>
@@ -87,22 +84,21 @@
           <td><button onclick="playAudio('${spanish}', 'es-ES')">Escuchar</button></td>
           <td><button onclick="playAudio('${chinese}', 'zh-CN')">Escuchar</button></td>
         `;
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
       }
     }
 
-    // Función para reproducir audio usando la Web Speech API
+    // Función para reproducir el audio utilizando la Web Speech API
     function playAudio(word, lang) {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang = lang;
         window.speechSynthesis.speak(utterance);
       } else {
-        alert('Lo siento, tu navegador no soporta la síntesis de voz.');
+        alert("Tu navegador no soporta la síntesis de voz.");
       }
     }
 
-    // Ejecutar getWords al cargar la página
     window.onload = getWords;
   </script>
 </body>
