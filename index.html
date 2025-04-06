@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Idioma Speaker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 1.2em;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔊 Pronunciación de Palabras</h2>
+  <input type="text" id="word" placeholder="Escribe una palabra...">
+  <br>
+  <select id="language">
+    <option value="es-ES">Español</option>
+    <option value="zh-CN">Chino</option>
+  </select>
+  <br>
+  <button onclick="speak()">Escuchar</button>
+
+  <script>
+    function speak() {
+      const word = document.getElementById("word").value;
+      const lang = document.getElementById("language").value;
+
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = lang;
+      speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
