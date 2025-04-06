@@ -1,70 +1,106 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traductor y Pronunciación</title>
-    <script>
-        // Función para obtener las palabras del script de Google
-        async function getWords() {
-            const url = 'https://script.google.com/macros/s/AKfycbxpVuje_wA3dftjsKMVpunLZawZEhTXgm0SDSaKdqWmEiLQP4LBMx_33BOXRG0zwmiyGQ/exec';
-
-            try {
-                const response = await fetch(url);
-                const data = await response.text();
-                const words = data.split('\n').filter(word => word !== '');
-                displayWords(words);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        // Función para mostrar las palabras en las tablas
-        function displayWords(words) {
-            const table = document.getElementById('word-table');
-            table.innerHTML = ''; // Limpiar la tabla antes de agregar nuevas filas
-
-            // Agregar las palabras en las columnas correspondientes
-            words.forEach((word, index) => {
-                const row = document.createElement('tr');
-                const cell = document.createElement('td');
-                cell.textContent = word;
-                row.appendChild(cell);
-
-                // Agregar el botón de audio para la pronunciación
-                const audioCell = document.createElement('td');
-                const audioButton = document.createElement('button');
-                audioButton.textContent = 'Escuchar';
-                audioButton.onclick = () => playAudio(word);
-                audioCell.appendChild(audioButton);
-                row.appendChild(audioCell);
-
-                table.appendChild(row);
-            });
-        }
-
-        // Función para reproducir la pronunciación usando Google TTS
-        function playAudio(word) {
-            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=es&client=tw-ob`);
-            audio.play();
-        }
-
-        // Llamar a la función para obtener y mostrar las palabras
-        window.onload = getWords;
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabla de Traducciones y Pronunciación</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
-    <h1>Tabla de Traducciones</h1>
-    <table id="word-table" border="1">
-        <thead>
-            <tr>
-                <th>Palabra</th>
-                <th>Pronunciación</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Las filas de palabras se agregarán aquí -->
-        </tbody>
-    </table>
+  <h1>Tabla de Traducciones</h1>
+  <table id="wordTable">
+    <thead>
+      <tr>
+        <th>Inglés</th>
+        <th>Español</th>
+        <th>Chino</th>
+        <th>Escuchar (Inglés)</th>
+        <th>Escuchar (Español)</th>
+        <th>Escuchar (Chino)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Función para obtener las palabras desde tu script de Google
+    async function getWords() {
+      // Esta es la URL de tu script de Google (base funcionando)
+      const url = 'https://script.google.com/macros/s/AKfycbxpVuje_wA3dftjsKMVpunLZawZEhTXgm0SDSaKdqWmEiLQP4LBMx_33BOXRG0zwmiyGQ/exec';
+      try {
+        const response = await fetch(url);
+        const data = await response.text();
+        // Suponemos que cada 3 líneas corresponden a [Inglés, Español, Chino]
+        const lines = data.split('\n').filter(line => line.trim() !== '');
+        displayWords(lines);
+      } catch (error) {
+        console.error("Error al obtener las palabras:", error);
+      }
+    }
+
+    // Función para mostrar las palabras en la tabla
+    function displayWords(lines) {
+      const tbody = document.querySelector('#wordTable tbody');
+      tbody.innerHTML = '';
+      // Se asume que cada 3 líneas forman una entrada
+      for (let i = 0; i < lines.length; i += 3) {
+        const english = lines[i];
+        const spanish = lines[i + 1];
+        const chinese = lines[i + 2];
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${english}</td>
+          <td>${spanish}</td>
+          <td>${chinese}</td>
+          <td><button onclick="playAudio('${english}', 'en-US')">Escuchar</button></td>
+          <td><button onclick="playAudio('${spanish}', 'es-ES')">Escuchar</button></td>
+          <td><button onclick="playAudio('${chinese}', 'zh-CN')">Escuchar</button></td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    // Función para reproducir el audio usando la Web Speech API
+    function playAudio(word, lang) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = lang;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Tu navegador no soporta la síntesis de voz.");
+      }
+    }
+
+    // Al cargar la página, obtenemos las palabras
+    window.onload = getWords;
+  </script>
 </body>
 </html>
