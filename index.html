@@ -17,9 +17,8 @@
   </style>
 </head>
 <body>
-  <h2>🔊 Pronunciación de Palabras</h2>
-  <input type="text" id="word" placeholder="Escribe una palabra...">
-  <br>
+  <h2>🔊 Pronunciación desde Google Sheets</h2>
+  <p><strong>Palabra:</strong> <span id="displayWord">Cargando...</span></p>
   <select id="language">
     <option value="es-ES">Español</option>
     <option value="zh-CN">Chino</option>
@@ -28,11 +27,22 @@
   <button onclick="speak()">Escuchar</button>
 
   <script>
-    function speak() {
-      const word = document.getElementById("word").value;
-      const lang = document.getElementById("language").value;
+    let palabra = "";
 
-      const utterance = new SpeechSynthesisUtterance(word);
+    // URL de tu Web App de Google Apps Script (reemplaza con tu URL)
+    const API_URL = "https://script.google.com/macros/s/AKfycbyF7Ou83nCQzKRyXIt2NdOk4x2Ach9LZiOB2wVq14QF/dev";  // <- cambia esto por tu URL
+
+    // Obtener palabra desde Google Sheets
+    fetch(API_URL)
+      .then(res => res.text())
+      .then(data => {
+        palabra = data;
+        document.getElementById("displayWord").textContent = palabra;
+      });
+
+    function speak() {
+      const lang = document.getElementById("language").value;
+      const utterance = new SpeechSynthesisUtterance(palabra);
       utterance.lang = lang;
       speechSynthesis.speak(utterance);
     }
