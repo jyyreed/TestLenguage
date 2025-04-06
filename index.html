@@ -1,27 +1,70 @@
-function doGet() {
-  // Accede a tu hoja de cálculo de Google
-  var ss = SpreadsheetApp.openById('1yfF8PUt0NmRZR-Ac7Eqk9FF9yUSeqx7z1PA5CIjRTbI');
-  var sheet = ss.getSheetByName('Idiomas');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductor y Pronunciación</title>
+    <script>
+        // Función para obtener las palabras del script de Google
+        async function getWords() {
+            const url = 'https://script.google.com/macros/s/AKfycbyS5ZOg7BrJ79cT7E_YjMRVH3FTws-Y1ocQ0E4SXmL0jOE-27MmDKAUijbJJJt8g-RjcQ/exec';
 
-  // Obtén todas las filas desde la fila 3 hacia abajo, y las tres columnas
-  var data = sheet.getRange(3, 2, sheet.getLastRow() - 2, 3).getValues();
+            try {
+                const response = await fetch(url);
+                const data = await response.text();
+                const words = data.split('\n').filter(word => word !== '');
+                displayWords(words);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
-  var result = "";
+        // Función para mostrar las palabras en las tablas
+        function displayWords(words) {
+            const table = document.getElementById('word-table');
+            table.innerHTML = ''; // Limpiar la tabla antes de agregar nuevas filas
 
-  // Recorre los datos y arma un string con las palabras de cada columna
-  data.forEach(function(row) {
-    var english = row[0];  // Palabra en inglés
-    var spanish = row[1];  // Palabra en español
-    var chinese = row[2];  // Palabra en chino
-    
-    result += english + '\n' + spanish + '\n' + chinese + '\n';
-  });
+            // Agregar las palabras en las columnas correspondientes
+            words.forEach((word, index) => {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.textContent = word;
+                row.appendChild(cell);
 
-  // Establecer los encabezados CORS para permitir solicitudes
-  var output = ContentService.createTextOutput(result);
-  output.setMimeType(ContentService.MimeType.TEXT);
-  output.appendHeader('Access-Control-Allow-Origin', '*'); // Permitir todos los orígenes
-  output.appendHeader('Access-Control-Allow-Methods', 'GET'); // Solo métodos GET
+                // Agregar el botón de audio para la pronunciación
+                const audioCell = document.createElement('td');
+                const audioButton = document.createElement('button');
+                audioButton.textContent = 'Escuchar';
+                audioButton.onclick = () => playAudio(word);
+                audioCell.appendChild(audioButton);
+                row.appendChild(audioCell);
 
-  return output;
-}
+                table.appendChild(row);
+            });
+        }
+
+        // Función para reproducir la pronunciación usando Google TTS
+        function playAudio(word) {
+            const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${word}&tl=es&client=tw-ob`);
+            audio.play();
+        }
+
+        // Llamar a la función para obtener y mostrar las palabras
+        window.onload = getWords;
+    </script>
+</head>
+<body>
+    <h1>Tabla de Traducciones</h1>
+    <table id="word-table" border="1">
+        <thead>
+            <tr>
+                <th>Palabra</th>
+                <th>Pronunciación</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas de palabras se agregarán aquí -->
+        </tbody>
+    </table>
+</body>
+</html>
